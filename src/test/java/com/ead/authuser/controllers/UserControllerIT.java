@@ -78,7 +78,6 @@ public class UserControllerIT {
         result.andExpect(jsonPath("$.lastUpdateDate").exists());
     }
 
-    //Remove the @JsonProperty annotation from the password attribute in the UserDTO class to run the test successfully.
     @Test
     public void registerShouldSaveObjectWhenCorrectStructure() throws Exception {
 
@@ -130,7 +129,6 @@ public class UserControllerIT {
         result.andExpect(jsonPath("$.lastUpdateDate").exists());
     }
 
-    //Remove the @JsonProperty annotation from the OldPassword attribute in the UserDTO class to run the test successfully.
     @Test
     public void updatePasswordShouldSaveNewPasswordWhenOldPasswordIsCorrectAndIdExists() throws Exception {
 
