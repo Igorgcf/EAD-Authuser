@@ -1,0 +1,221 @@
+{
+	"info": {
+		"_postman_id": "b9edb26f-c0d6-4d99-ab74-7444cf88346e",
+		"name": "EAD-AUTH-USER",
+		"schema": "https://schema.getpostman.com/json/collection/v2.0.0/collection.json",
+		"_exporter_id": "30344579",
+		"_collection_link": "https://i-dont-know-4771.postman.co/workspace/Decoder--EAD~ead6ce3f-7503-4034-bee3-a54aeded82be/collection/30344579-b9edb26f-c0d6-4d99-ab74-7444cf88346e?action=share&source=collection_link&creator=30344579"
+	},
+	"item": [
+		{
+			"name": "AUTH",
+			"item": [
+				{
+					"name": "SIGN UP",
+					"protocolProfileBehavior": {
+						"disabledSystemHeaders": {}
+					},
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \r\n    \"username\" : \"BrunoSilva\",\r\n    \"email\" : \"bruno@gmail.com.br\",\r\n    \"password\" : \"1234567\",\r\n    \"fullName\" : \"Bruno Silva Ferreira Melo\",\r\n    \"phoneNumber\" : \"+55 11 91009-0807\",\r\n    \"cpf\" : \"123-321-144-7\",\r\n    \"imageUrl\" : \"www.image.com\"\r\n}\r\n"
+						},
+						"url": "http://localhost:8087/auth/signup"
+					},
+					"response": []
+				},
+				{
+					"name": "LOGIN",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"username\": \"michellibrito\",\r\n    \"password\": \"1234567\"\r\n}"
+						},
+						"url": "http://localhost:8087/auth/login"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "USER",
+			"item": [
+				{
+					"name": "Find All Paged",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8087/users?userType=STUDENT&userStatus=ACTIVE&email=contato@michellibrito.com.br&username=michellibrito1&fullName=Michelli Brito&phoneNumber=11 999558844&cpf=123.456.789-0&page=0&size=12&sort=creationDate,DESC",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8087",
+							"path": [
+								"users"
+							],
+							"query": [
+								{
+									"key": "userType",
+									"value": "STUDENT"
+								},
+								{
+									"key": "userStatus",
+									"value": "ACTIVE"
+								},
+								{
+									"key": "email",
+									"value": "contato@michellibrito.com.br"
+								},
+								{
+									"key": "username",
+									"value": "michellibrito1"
+								},
+								{
+									"key": "fullName",
+									"value": "Michelli Brito"
+								},
+								{
+									"key": "phoneNumber",
+									"value": "11 999558844"
+								},
+								{
+									"key": "cpf",
+									"value": "123.456.789-0"
+								},
+								{
+									"key": "page",
+									"value": "0"
+								},
+								{
+									"key": "size",
+									"value": "12"
+								},
+								{
+									"key": "sort",
+									"value": "creationDate,DESC"
+								},
+								{
+									"key": "courseId",
+									"value": "e4044cf7-42e2-48f3-be03-7220f1f85d5a",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Find By Id",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [],
+						"url": "http://localhost:8087/users/8380b83a-f08f-4977-adf1-650b7682fed8"
+					},
+					"response": []
+				},
+				{
+					"name": "Update User",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": " {\r\n    \"fullName\" : \"Bruno Silva Ferreira de Souza\",\r\n    \"phoneNumber\" : \"+55 11 97110-3144\",\r\n    \"cpf\" : \"123-321-213-7\"\r\n}"
+						},
+						"url": "http://localhost:8087/users/8380b83a-f08f-4977-adf1-650b7682fed8"
+					},
+					"response": []
+				},
+				{
+					"name": "Update Password",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n       \"password\": \"1234567\",\r\n       \"oldPassword\": \"1234567890\"\r\n}"
+						},
+						"url": "http://localhost:8087/users/199541a4-d03b-4b2d-b689-837402e9df37/password"
+					},
+					"response": []
+				},
+				{
+					"name": "Update Image",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"imageUrl\" : \"www.img.com\"\r\n}"
+						},
+						"url": "http://localhost:8087/users/199541a4-d03b-4b2d-b689-837402e9df37/image"
+					},
+					"response": []
+				},
+				{
+					"name": "By Id",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "DELETE",
+						"header": [],
+						"url": "http://localhost:8087/users/8380b83a-f08f-4977-adf1-650b7682fed8"
+					},
+					"response": []
+				}
+			]
+		}
+	]
+}
