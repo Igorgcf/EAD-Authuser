@@ -3,7 +3,6 @@ package com.ead.authuser.clients;
 import com.ead.authuser.dto.CourseDTO;
 import com.ead.authuser.dto.ResponsePageDTO;
 import com.ead.authuser.services.UtilsService;
-import com.ead.authuser.services.impl.UtilsServiceImpl;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.ParameterizedTypeReference;
@@ -49,6 +48,27 @@ public class UserClient {
         log.info("Ending request /courses userId {} ", userId);
 
         return Page.empty();
+        }
+
+        public CourseDTO findById(UUID courseId){
+
+            String url = service.createUrl(courseId);
+
+            log.debug("Request URL: {} ", url);
+            log.info("Request URL: {} ", url);
+
+            try {
+                ResponseEntity<CourseDTO> result = restTemplate.exchange(url, HttpMethod.GET, null, CourseDTO.class);
+                if(result.getBody()!= null) {
+                    log.debug("Response Element: {} ", result.getBody());
+                    return result.getBody();
+                }
+            } catch (HttpStatusCodeException e) {
+                log.error("Error request /courses {} ", e);
+            }
+            log.info("Ending request /courses courseId {} ", courseId);
+
+            return null;
         }
     }
 
