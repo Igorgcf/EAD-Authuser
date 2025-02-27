@@ -36,9 +36,7 @@ public class UserController {
 
     @GetMapping
     public ResponseEntity<Page<UserDTO>> findAllPaged(SpecificationTemplate.UserSpec spec,
-                                                      @PageableDefault(page = 0, size = 12, sort = "username", direction = Sort.Direction.ASC) Pageable pageable,
-                                                      @RequestParam(required = false) UUID courseId){
-
+                                                      @PageableDefault(page = 0, size = 12, sort = "username", direction = Sort.Direction.ASC) Pageable pageable, @RequestParam(required = false) UUID courseId){
         Page<UserDTO> page = null;
         if(courseId != null) {
             page = service.findAllPaged(SpecificationTemplate.userCourseId(courseId).and(spec), pageable);
