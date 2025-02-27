@@ -6,5 +6,7 @@ import java.util.UUID;
 
 public interface UtilsService {
 
-    public String createUrl(UUID userId, Pageable pageable);
+    String createUrl(UUID userId, Pageable pageable);
+
+    String createUrl(UUID courseId);
 }
