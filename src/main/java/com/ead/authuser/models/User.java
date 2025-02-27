@@ -89,4 +89,8 @@ public class User implements Serializable {
         this.creationDate = creationDate;
         this.lastUpdateDate = lastUpdateDate;
     }
+
+    public UserCourse convertToUserCourse(UUID courseId) {
+        return new UserCourse(null, courseId, this );
+    }
 }
