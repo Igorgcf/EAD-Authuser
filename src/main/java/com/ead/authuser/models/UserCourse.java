@@ -23,11 +23,15 @@ public class UserCourse implements Serializable {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private UUID id;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @ManyToOne(optional = false)
     private User user;
 
     @Column(nullable = false)
     private UUID courseId;
 
-
+    public UserCourse(UUID id, UUID courseId, User user) {
+        this.id = id;
+        this.courseId = courseId;
+        this.user = user;
+    }
 }
