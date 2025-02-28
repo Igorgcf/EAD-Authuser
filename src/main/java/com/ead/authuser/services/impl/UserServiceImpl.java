@@ -72,9 +72,8 @@ public class UserServiceImpl implements UserService {
 
         Optional<User> obj = repository.findById(id);
         User entity = obj.orElseThrow(() -> new ResourceNotFoundException("Id not found: " + id));
-        entity.setFullName(dto.getFullName());
-        entity.setPhoneNumber(dto.getPhoneNumber());
-        entity.setCpf(dto.getCpf());
+
+        copyDtoToEntity(entity, dto);
         entity.setLastUpdateDate(LocalDateTime.now(ZoneId.of("UTC")));
         repository.save(entity);
 
@@ -83,6 +82,26 @@ public class UserServiceImpl implements UserService {
 
         return new UserDTO(entity);
 
+    }
+
+    @Transactional
+    @Override
+    public UserDTO updateCpf(UUID id, UserDTO dto) {
+
+        log.debug("UpdateCpf UserDTO received {} ", dto.toString());
+
+        Optional<User> obj = repository.findById(id);
+        User entity = obj.orElseThrow(() -> new ResourceNotFoundException("Id not found: " + id));
+
+        copyDtoToEntity(entity, dto);
+        entity.setLastUpdateDate(LocalDateTime.now(ZoneId.of("UTC")));
+
+        repository.save(entity);
+
+        log.debug("UpdateCpf User saved {} ", entity.toString());
+        log.info("Cpf updated successfully Id: {}", entity.getId());
+
+        return new UserDTO(entity);
     }
 
     @Override
@@ -141,13 +160,46 @@ public class UserServiceImpl implements UserService {
 
     void copyDtoToEntity(User entity, UserDTO dto){
 
-        entity.setId(dto.getId());
-        entity.setUsername(dto.getUsername());
-        entity.setPassword(dto.getPassword());
-        entity.setEmail(dto.getEmail());
-        entity.setFullName(dto.getFullName());
-        entity.setPhoneNumber(dto.getPhoneNumber());
-        entity.setCpf(dto.getCpf());
-        entity.setImageUrl(dto.getImageUrl());
+            if (dto.getUsername() != null) {
+                entity.setUsername(dto.getUsername());
+            } else {
+                entity.setUsername(entity.getUsername());
+            }
+
+            if (dto.getPassword() != null) {
+                entity.setPassword(dto.getPassword());
+            } else {
+                entity.setPassword(entity.getPassword());
+            }
+
+            if (dto.getEmail() != null) {
+                entity.setEmail(dto.getEmail());
+            } else {
+                entity.setEmail(entity.getEmail());
+            }
+
+            if (dto.getFullName() != null) {
+                entity.setFullName(dto.getFullName());
+            } else {
+                entity.setFullName(entity.getFullName());
+            }
+
+            if (dto.getPhoneNumber() != null) {
+                entity.setPhoneNumber(dto.getPhoneNumber());
+            } else {
+                entity.setPhoneNumber(entity.getPhoneNumber());
+            }
+
+            if (dto.getCpf() != null) {
+                entity.setCpf(dto.getCpf());
+            } else {
+                entity.setCpf(entity.getCpf());
+            }
+
+            if (dto.getImageUrl() != null) {
+                entity.setImageUrl(dto.getImageUrl());
+            } else {
+                entity.setImageUrl(entity.getImageUrl());
+            }
+        }
     }
-}
