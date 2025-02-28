@@ -18,6 +18,8 @@ public interface UserService {
 
     UserDTO update(UUID id, UserDTO dto);
 
+    UserDTO updateCpf (UUID id, UserDTO dto);
+
     void updatePassword(UUID id, UserDTO dto);
 
     UserDTO updateImage(UUID id, UserDTO dto);
