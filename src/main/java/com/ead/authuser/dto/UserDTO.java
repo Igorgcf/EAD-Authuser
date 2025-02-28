@@ -27,6 +27,7 @@ public class UserDTO extends RepresentationModel<UserDTO> {
     public interface UserView{
         public static interface RegistrationPost {}
         public static interface UserPut {}
+        public static interface CpfPut {}
         public static interface PasswordPut {}
         public static interface ImagePut {}
     }
@@ -56,18 +57,18 @@ public class UserDTO extends RepresentationModel<UserDTO> {
     @JsonView(UserView.PasswordPut.class)
     private String oldPassword;
 
-    @Size(min = 7, max = 57, message = "Minimum character value allowed is 07 and the maximum is 57.")
+    @Size(groups = {UserView.RegistrationPost.class, UserView.UserPut.class}, min = 7, max = 57, message = "Minimum character value allowed is 07 and the maximum is 57.")
     @JsonView({UserView.RegistrationPost.class, UserView.UserPut.class})
     private String fullName;
 
-    @Size(min = 11, max = 57, message = "Minimum character value allowed is 07 and the maximum is 57.")
+    @Size(groups = {UserView.RegistrationPost.class, UserView.UserPut.class}, min = 11, max = 57, message = "Minimum character value allowed is 07 and the maximum is 57.")
     @JsonView({UserView.RegistrationPost.class, UserView.UserPut.class})
     private String phoneNumber;
 
-    @NotBlank(groups = {UserView.RegistrationPost.class, UserView.UserPut.class}, message = "The CPF field is mandatory and and blanks are not allowed.")
-    @CpfConstraint(groups = {UserView.RegistrationPost.class, UserView.UserPut.class}, message = "The CPF is already in use.")
-    @Size(groups = {UserView.RegistrationPost.class, UserView.UserPut.class}, min = 7, max = 27, message = "Minimum character value allowed is 07 and the maximum is 27.")
-    @JsonView({UserView.RegistrationPost.class, UserView.UserPut.class})
+    @NotBlank(groups = {UserView.RegistrationPost.class, UserView.CpfPut.class}, message = "The CPF field is mandatory and and blanks are not allowed.")
+    @CpfConstraint(groups = {UserView.RegistrationPost.class, UserView.CpfPut.class}, message = "The CPF is already in use.")
+    @Size(groups = {UserView.RegistrationPost.class, UserView.CpfPut.class}, min = 7, max = 27, message = "Minimum character value allowed is 07 and the maximum is 27.")
+    @JsonView({UserView.RegistrationPost.class, UserView.CpfPut.class})
     private String cpf;
 
     @NotBlank(groups = UserView.ImagePut.class, message = "The image field is mandatory and blanks are not allowed.")
