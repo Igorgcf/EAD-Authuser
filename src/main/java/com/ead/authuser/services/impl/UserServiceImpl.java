@@ -4,6 +4,8 @@ import com.ead.authuser.dto.UserDTO;
 import com.ead.authuser.enums.UserStatus;
 import com.ead.authuser.enums.UserType;
 import com.ead.authuser.models.User;
+import com.ead.authuser.models.UserCourse;
+import com.ead.authuser.repositories.UserCourseRepository;
 import com.ead.authuser.repositories.UserRepository;
 import com.ead.authuser.services.UserService;
 import com.ead.authuser.services.exceptions.BadRequestException;
@@ -19,6 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -28,6 +31,9 @@ public class UserServiceImpl implements UserService {
 
     @Autowired
     private UserRepository repository;
+
+    @Autowired
+    private UserCourseRepository userCourseRepository;
 
     @Override
     @Transactional(readOnly = true)
@@ -40,7 +46,7 @@ public class UserServiceImpl implements UserService {
     @Transactional(readOnly = true)
     public UserDTO findById(UUID id) {
         Optional<User> obj = repository.findById(id);
-        User entity = obj.orElseThrow(() -> new ResourceNotFoundException("Id not found: " + obj.get().getId()));
+        User entity = obj.orElseThrow(() -> new ResourceNotFoundException("Id not found: " + id));
         return new UserDTO(entity);
     }
 
@@ -84,8 +90,8 @@ public class UserServiceImpl implements UserService {
 
     }
 
-    @Transactional
     @Override
+    @Transactional
     public UserDTO updateCpf(UUID id, UserDTO dto) {
 
         log.debug("UpdateCpf UserDTO received {} ", dto.toString());
@@ -145,6 +151,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional
     public void deleteById(UUID id) {
 
         log.debug("DeleteById id received: {}", id);
@@ -153,6 +160,12 @@ public class UserServiceImpl implements UserService {
         if(obj.isEmpty()){
             throw new ResourceNotFoundException("Id not found: " + id);
         }
+
+        List<UserCourse> list = userCourseRepository.findAllUserCourseIntoUser(id);
+        if(list != null && !list.isEmpty()){
+            userCourseRepository.deleteAll(list);
+        }
+
         repository.deleteById(id);
         log.debug("User deleted successfully Id: {}", id);
         log.info("User deleted successfully Id: {}", id);
