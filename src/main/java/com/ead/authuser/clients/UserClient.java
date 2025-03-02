@@ -3,6 +3,7 @@ package com.ead.authuser.clients;
 import com.ead.authuser.dto.CourseDTO;
 import com.ead.authuser.dto.ResponsePageDTO;
 import com.ead.authuser.services.UtilsService;
+import com.ead.authuser.services.exceptions.ResourceNotFoundException;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.ParameterizedTypeReference;
@@ -11,6 +12,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestTemplate;
 
@@ -63,10 +65,9 @@ public class UserClient {
                     log.debug("Response Element: {} ", result.getBody());
                     return result.getBody();
                 }
-            } catch (HttpStatusCodeException e) {
-                log.error("Error request /courses {} ", e);
+            } catch (HttpClientErrorException.NotFound e) {
+                throw new ResourceNotFoundException("Course Id not found: " + courseId);
             }
-            log.info("Ending request /courses courseId {} ", courseId);
 
             return null;
         }
