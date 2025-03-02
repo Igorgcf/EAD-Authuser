@@ -4,6 +4,7 @@ import com.ead.authuser.clients.UserClient;
 import com.ead.authuser.dto.CourseDTO;
 import com.ead.authuser.dto.UserCourseDTO;
 import com.ead.authuser.enums.UserStatus;
+import com.ead.authuser.enums.UserType;
 import com.ead.authuser.models.User;
 import com.ead.authuser.models.UserCourse;
 import com.ead.authuser.repositories.UserCourseRepository;
@@ -13,6 +14,8 @@ import com.ead.authuser.services.exceptions.BadRequestException;
 import com.ead.authuser.services.exceptions.ResourceNotFoundException;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -37,7 +40,7 @@ public class UserCourseServiceImpl implements UserCourseService {
     public UserCourseDTO saveSubscriptionUserInCourse(UUID userId, CourseDTO dto) {
 
         Optional<User> obj = repository.findById(userId);
-        User entity = obj.orElseThrow(() -> new ResourceNotFoundException("Id not found: " + userId));
+        User entity = obj.orElseThrow(() -> new ResourceNotFoundException("User Id not found: " + userId));
 
         if(entity.getUserStatus().equals(UserStatus.BLOCKED)){
             throw new BadRequestException("User is blocked");
@@ -49,10 +52,6 @@ public class UserCourseServiceImpl implements UserCourseService {
         }
 
         dto = client.findById(dto.getId());
-
-        if(dto == null){
-            throw new ResourceNotFoundException("Course Id not found: " + dto.getId());
-        }
 
         UserCourse userCourse = entity.convertToUserCourse(dto.getId());
 
@@ -67,5 +66,13 @@ public class UserCourseServiceImpl implements UserCourseService {
                 (userCourse.getUser().getId() != null ? userCourse.getUser().getId() : "No userId associated"));
 
         return new UserCourseDTO(userCourse.getId(), userCourse.getCourseId(), userCourse.getUser());
+    }
+
+    @Transactional
+    @Override
+    public Page<UserCourseDTO> findAllPaged(Pageable pageable) {
+
+        Page<UserCourse> page = UserCourseRepository.findAll(pageable);
+        return page.map(UserCourseDTO::new);
     }
 }
