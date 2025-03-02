@@ -34,12 +34,18 @@ public class UserCourseController {
     @Autowired
     private UserCourseService service;
 
+    @GetMapping(value = "/users/courses")
+    public ResponseEntity<Page<UserCourseDTO>> findAllPaged(@PageableDefault(page = 0, size = 12, sort = "id", direction = Sort.Direction.ASC) Pageable pageable){
+
+        Page<UserCourseDTO> page = service.findAllPaged(pageable);
+        return ResponseEntity.ok().body(page);
+    }
+
     @GetMapping(value = "/users/{userId}/courses")
     public ResponseEntity<Page<CourseDTO>> findAllCoursesByUser(@PageableDefault(page = 0, size = 12, sort = "id", direction = Sort.Direction.ASC) Pageable pageable,
                                                                 @PathVariable(value = "userId") UUID userId){
 
         Page<CourseDTO> page = userClient.findAllCoursesByUser(userId, pageable);
-
         return ResponseEntity.ok().body(page);
     }
 
