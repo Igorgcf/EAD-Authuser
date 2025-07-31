@@ -4,7 +4,6 @@ import com.ead.authuser.clients.UserClient;
 import com.ead.authuser.dto.CourseDTO;
 import com.ead.authuser.dto.UserCourseDTO;
 import com.ead.authuser.enums.UserStatus;
-import com.ead.authuser.enums.UserType;
 import com.ead.authuser.models.User;
 import com.ead.authuser.models.UserCourse;
 import com.ead.authuser.repositories.UserCourseRepository;
@@ -19,6 +18,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -27,7 +27,7 @@ import java.util.UUID;
 public class UserCourseServiceImpl implements UserCourseService {
 
     @Autowired
-    private UserCourseRepository UserCourseRepository;
+    private UserCourseRepository userCourseRepository;
 
     @Autowired
     private UserRepository repository;
@@ -46,7 +46,7 @@ public class UserCourseServiceImpl implements UserCourseService {
             throw new BadRequestException("User is blocked");
         }
 
-        boolean existsByUserIdAndCourseId = UserCourseRepository.existsByUserIdAndCourseId(userId, dto.getId());
+        boolean existsByUserIdAndCourseId = userCourseRepository.existsByUserIdAndCourseId(userId, dto.getId());
         if(existsByUserIdAndCourseId){
             throw new BadRequestException("User already subscribed to this course");
         }
@@ -55,7 +55,7 @@ public class UserCourseServiceImpl implements UserCourseService {
 
         UserCourse userCourse = entity.convertToUserCourse(dto.getId());
 
-        UserCourseRepository.save(userCourse);
+        userCourseRepository.save(userCourse);
 
         log.debug("UserCourse Id saved {}, UserCourse courseId saved {}, UserCourse user saved {}" , userCourse.getId(),
                 (userCourse.getCourseId() != null ? userCourse.getCourseId() : "No courseId associated"),
@@ -72,7 +72,21 @@ public class UserCourseServiceImpl implements UserCourseService {
     @Override
     public Page<UserCourseDTO> findAllPaged(Pageable pageable) {
 
-        Page<UserCourse> page = UserCourseRepository.findAll(pageable);
+        Page<UserCourse> page = userCourseRepository.findAll(pageable);
         return page.map(UserCourseDTO::new);
+    }
+
+    @Transactional
+    @Override
+    public void deleteUserCourseByCourse(UUID courseId) {
+
+        List<UserCourse> userCourses = userCourseRepository.findAllUserCourseByCourseId(courseId);
+        if(userCourses != null && !userCourses.isEmpty()){
+            userCourseRepository.deleteAll(userCourses);
+        }else{
+            throw new ResourceNotFoundException("No users found for course Id: " + courseId);
+        }
+
+        log.info("User course deleted successfully Id: {}", courseId);
     }
 }
