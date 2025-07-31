@@ -12,6 +12,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonView;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
 import org.springframework.hateoas.RepresentationModel;
@@ -32,6 +33,8 @@ public class UserDTO extends RepresentationModel<UserDTO> {
         public static interface ImagePut {}
     }
 
+    @NotNull(groups = UserView.RegistrationPost.class, message = "The field id is mandatory.")
+    @JsonView(UserView.RegistrationPost.class)
     private UUID id;
 
     @NotBlank(groups = UserView.RegistrationPost.class, message = "The username field is mandatory and blanks are not allowed.")
