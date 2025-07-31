@@ -9,4 +9,6 @@ public interface UtilsService {
     String createUrl(UUID userId, Pageable pageable);
 
     String createUrl(UUID courseId);
+
+    String createUrlForDelete(UUID userId);
 }
