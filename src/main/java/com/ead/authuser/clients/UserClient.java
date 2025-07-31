@@ -2,6 +2,8 @@ package com.ead.authuser.clients;
 
 import com.ead.authuser.dto.CourseDTO;
 import com.ead.authuser.dto.ResponsePageDTO;
+import com.ead.authuser.dto.UserDTO;
+import com.ead.authuser.models.User;
 import com.ead.authuser.services.UtilsService;
 import com.ead.authuser.services.exceptions.ResourceNotFoundException;
 import lombok.extern.log4j.Log4j2;
@@ -71,6 +73,11 @@ public class UserClient {
             }
 
             return null;
+        }
+
+        public void deleteUserInCourse(UUID userId){
+        String url = service.createUrlForDelete(userId);
+        restTemplate.exchange(url, HttpMethod.DELETE, null, String.class);
         }
     }
 
