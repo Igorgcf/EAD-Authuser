@@ -1,5 +1,6 @@
 package com.ead.authuser.services.impl;
 
+import com.ead.authuser.clients.UserClient;
 import com.ead.authuser.dto.UserDTO;
 import com.ead.authuser.enums.UserStatus;
 import com.ead.authuser.enums.UserType;
@@ -35,10 +36,16 @@ public class UserServiceImpl implements UserService {
     @Autowired
     private UserCourseRepository userCourseRepository;
 
+    @Autowired
+    private UserClient client;
+
     @Override
     @Transactional(readOnly = true)
     public Page<UserDTO> findAllPaged(Specification<User> spec, Pageable pageable) {
         Page<User> page = repository.findAll(spec, pageable);
+        if(page.isEmpty()){
+            throw new ResourceNotFoundException("No users found.");
+        }
         return page.map(UserDTO::new);
     }
 
@@ -154,6 +161,8 @@ public class UserServiceImpl implements UserService {
     @Transactional
     public void deleteById(UUID id) {
 
+        boolean deleteUserCourseInCourse = false;
+
         log.debug("DeleteById id received: {}", id);
 
         Optional<User> obj = repository.findById(id);
@@ -164,9 +173,15 @@ public class UserServiceImpl implements UserService {
         List<UserCourse> list = userCourseRepository.findAllUserCourseIntoUser(id);
         if(list != null && !list.isEmpty()){
             userCourseRepository.deleteAll(list);
+            deleteUserCourseInCourse = true;
         }
 
         repository.deleteById(id);
+
+        if(deleteUserCourseInCourse){
+            log.debug("DeleteById User Id deleted: {}, deleting User in EAD-Course" , id);
+            client.deleteUserInCourse(id);
+        }
         log.debug("User deleted successfully Id: {}", id);
         log.info("User deleted successfully Id: {}", id);
     }
