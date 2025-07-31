@@ -12,4 +12,6 @@ public interface UserCourseService{
     UserCourseDTO saveSubscriptionUserInCourse(UUID userId, CourseDTO dto);
 
     Page<UserCourseDTO> findAllPaged(Pageable pageable);
+
+    void deleteUserCourseByCourse(UUID courseId);
 }
