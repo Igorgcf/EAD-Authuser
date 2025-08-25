@@ -74,11 +74,6 @@ public class UserClient {
 
             return null;
         }
-
-        public void deleteUserInCourse(UUID userId){
-        String url = service.createUrlForDelete(userId);
-        restTemplate.exchange(url, HttpMethod.DELETE, null, String.class);
-        }
     }
 
 
