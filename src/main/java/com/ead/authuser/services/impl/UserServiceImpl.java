@@ -5,13 +5,10 @@ import com.ead.authuser.dto.UserDTO;
 import com.ead.authuser.enums.UserStatus;
 import com.ead.authuser.enums.UserType;
 import com.ead.authuser.models.User;
-import com.ead.authuser.models.UserCourse;
-import com.ead.authuser.repositories.UserCourseRepository;
 import com.ead.authuser.repositories.UserRepository;
 import com.ead.authuser.services.UserService;
 import com.ead.authuser.services.exceptions.BadRequestException;
 import com.ead.authuser.services.exceptions.ResourceNotFoundException;
-
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -22,7 +19,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -32,9 +28,6 @@ public class UserServiceImpl implements UserService {
 
     @Autowired
     private UserRepository repository;
-
-    @Autowired
-    private UserCourseRepository userCourseRepository;
 
     @Autowired
     private UserClient client;
@@ -170,18 +163,8 @@ public class UserServiceImpl implements UserService {
             throw new ResourceNotFoundException("Id not found: " + id);
         }
 
-        List<UserCourse> list = userCourseRepository.findAllUserCourseIntoUser(id);
-        if(list != null && !list.isEmpty()){
-            userCourseRepository.deleteAll(list);
-            deleteUserCourseInCourse = true;
-        }
-
         repository.deleteById(id);
 
-        if(deleteUserCourseInCourse){
-            log.debug("DeleteById User Id deleted: {}, deleting User in EAD-Course" , id);
-            client.deleteUserInCourse(id);
-        }
         log.debug("User deleted successfully Id: {}", id);
         log.info("User deleted successfully Id: {}", id);
     }
