@@ -10,6 +10,8 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonView;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -33,8 +35,6 @@ public class UserDTO extends RepresentationModel<UserDTO> {
         public static interface ImagePut {}
     }
 
-    @NotNull(groups = UserView.RegistrationPost.class, message = "The field id is mandatory.")
-    @JsonView(UserView.RegistrationPost.class)
     private UUID id;
 
     @NotBlank(groups = UserView.RegistrationPost.class, message = "The username field is mandatory and blanks are not allowed.")
@@ -86,6 +86,20 @@ public class UserDTO extends RepresentationModel<UserDTO> {
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss'Z'")
     private LocalDateTime lastUpdateDate;
+
+    public EventDTO convertToUserDTOEventDTO() {
+
+        EventDTO dto =  new EventDTO();
+        dto.setUsername(this.username);
+        dto.setEmail(this.email);
+        dto.setFullName(this.fullName);
+        dto.setUserStatus(this.userStatus.toString());
+        dto.setUserType(this.userType.toString());
+        dto.setPhoneNumber(this.phoneNumber);
+        dto.setCpf(this.cpf);
+        dto.setImageUrl(this.imageUrl);
+        return dto;
+    }
 
     public UserDTO(){
     }
