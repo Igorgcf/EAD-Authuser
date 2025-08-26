@@ -2,9 +2,11 @@ package com.ead.authuser.services.impl;
 
 import com.ead.authuser.clients.UserClient;
 import com.ead.authuser.dto.UserDTO;
+import com.ead.authuser.enums.ActionType;
 import com.ead.authuser.enums.UserStatus;
 import com.ead.authuser.enums.UserType;
 import com.ead.authuser.models.User;
+import com.ead.authuser.publishers.EventPublisher;
 import com.ead.authuser.repositories.UserRepository;
 import com.ead.authuser.services.UserService;
 import com.ead.authuser.services.exceptions.BadRequestException;
@@ -31,6 +33,9 @@ public class UserServiceImpl implements UserService {
 
     @Autowired
     private UserClient client;
+
+    @Autowired
+    private EventPublisher publisher;
 
     @Override
     @Transactional(readOnly = true)
@@ -68,6 +73,15 @@ public class UserServiceImpl implements UserService {
         log.info("User Saved successfully Id: {}", entity.getId());
 
         return new UserDTO(entity);
+    }
+
+    @Override
+    @Transactional
+    public UserDTO save(UserDTO dto) {
+
+        dto = insert(dto);
+        publisher.publishEvent(dto.convertToUserDTOEventDTO(), ActionType.CREATE);
+        return dto;
     }
 
     @Override
