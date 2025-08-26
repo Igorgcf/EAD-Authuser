@@ -33,8 +33,6 @@ public class UserDTO extends RepresentationModel<UserDTO> {
         public static interface ImagePut {}
     }
 
-    @NotNull(groups = UserView.RegistrationPost.class, message = "The field id is mandatory.")
-    @JsonView(UserView.RegistrationPost.class)
     private UUID id;
 
     @NotBlank(groups = UserView.RegistrationPost.class, message = "The username field is mandatory and blanks are not allowed.")
