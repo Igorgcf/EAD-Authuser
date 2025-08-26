@@ -16,6 +16,8 @@ public interface UserService {
 
     UserDTO insert(UserDTO dto);
 
+    UserDTO save(UserDTO dto);
+
     UserDTO update(UUID id, UserDTO dto);
 
     UserDTO updateCpf (UUID id, UserDTO dto);
