@@ -1,14 +1,6 @@
 package com.ead.authuser.dto;
 
-import com.ead.authuser.validations.CpfConstraint;
-import com.ead.authuser.validations.EmailConstraint;
-import com.ead.authuser.validations.UsernameConstraint;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonView;
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
 import lombok.Data;
 
 import java.util.UUID;
