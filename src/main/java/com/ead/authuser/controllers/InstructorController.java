@@ -35,14 +35,14 @@ public class InstructorController {
                                                     @Validated(UserDTO.UserView.RegistrationPost.class)
                                                     @RequestBody @Valid UserDTO dto){
 
-        dto = service.insertInstructor(dto);
+        dto = service.save(dto);
         return ResponseEntity.status(HttpStatus.CREATED).body(dto);
     }
 
     @PutMapping(value = "/{id}")
     public ResponseEntity<Object> updateUserToInstructor(@PathVariable(value = "id") UUID id){
 
-        service.updateUserToInstructor(id);
+        service.updaterUserToInstructor(id);
         return ResponseEntity.ok().body("User updated to instructor successfully.");
     }
 
@@ -59,7 +59,7 @@ public class InstructorController {
                                                     @Validated(UserDTO.UserView.UserPut.class)
                                                     @RequestBody @Valid UserDTO dto){
 
-        dto = service.updateInstructor(id, dto);
+        dto = service.updaterInstructor(id, dto);
         return ResponseEntity.ok().body(dto);
     }
 
@@ -69,7 +69,7 @@ public class InstructorController {
                                              @Validated(UserDTO.UserView.CpfPut.class)
                                              @RequestBody @Valid UserDTO dto){
 
-        dto = service.updateCpf(id, dto);
+        dto = service.updaterCpf(id, dto);
         return ResponseEntity.ok().body(dto);
 
     }
@@ -90,14 +90,14 @@ public class InstructorController {
                                               @Validated(UserDTO.UserView.ImagePut.class)
                                               @RequestBody @Valid UserDTO dto){
 
-        service.updateImage(id, dto);
+        service.updaterImage(id, dto);
         return ResponseEntity.ok().body("Image updated successfully.");
     }
 
     @DeleteMapping(value = "/{id}")
     public ResponseEntity<Object> deleteById(@PathVariable (value = "id") UUID id){
 
-        service.deleteById(id);
+        service.deleterById(id);
         return ResponseEntity.ok().body("Instructor deleted successfully.");
     }
 }
