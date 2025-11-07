@@ -1,9 +1,11 @@
 package com.ead.authuser.services.impl;
 
 import com.ead.authuser.dto.UserDTO;
+import com.ead.authuser.enums.ActionType;
 import com.ead.authuser.enums.UserStatus;
 import com.ead.authuser.enums.UserType;
 import com.ead.authuser.models.User;
+import com.ead.authuser.publishers.EventPublisher;
 import com.ead.authuser.repositories.UserRepository;
 import com.ead.authuser.services.InstructorService;
 import com.ead.authuser.services.exceptions.BadRequestException;
@@ -24,6 +26,9 @@ public class InstructorServiceImpl implements InstructorService {
 
     @Autowired
     private UserRepository repository;
+
+    @Autowired
+    private EventPublisher publisher;
 
     @Transactional
     @Override
@@ -47,9 +52,18 @@ public class InstructorServiceImpl implements InstructorService {
         return new UserDTO(entity);
     }
 
+    @Override
+    public UserDTO save(UserDTO dto) {
+
+        dto = insertInstructor(dto);
+        publisher.publishEvent(dto.convertToUserDTOEventDTO(), ActionType.CREATE);
+
+        return dto;
+    }
+
     @Transactional
     @Override
-    public void updateUserToInstructor(UUID id) {
+    public UserDTO updateUserToInstructor(UUID id) {
 
         log.debug("Update User to Instructor Id received: {} ", id);
 
@@ -63,6 +77,17 @@ public class InstructorServiceImpl implements InstructorService {
 
         log.debug("Update User to Instructor User Updated: {} ", entity.toString());
         log.info("User Updated to Instructor Successfully Id: {} ", entity.getId());
+
+        return new UserDTO(entity);
+    }
+
+    @Override
+    @Transactional
+    public UserDTO updaterUserToInstructor(UUID id) {
+
+        UserDTO dto = updateUserToInstructor(id);
+        publisher.publishEvent(dto.convertToUserDTOEventDTO(), ActionType.UPDATE);
+        return dto;
     }
 
     @Transactional(readOnly = true)
@@ -107,6 +132,15 @@ public class InstructorServiceImpl implements InstructorService {
         return new UserDTO(entity);
     }
 
+    @Override
+    public UserDTO updaterInstructor(UUID id, UserDTO dto) {
+
+        dto = updateInstructor(id, dto);
+        publisher.publishEvent(dto.convertToUserDTOEventDTO(), ActionType.UPDATE);
+
+        return dto;
+    }
+
     @Transactional
     @Override
     public UserDTO updateCpf(UUID id, UserDTO dto) {
@@ -128,6 +162,15 @@ public class InstructorServiceImpl implements InstructorService {
         log.debug("Update CPF CPF Saved: {} ", entity.getCpf());
         log.info("CPF updated Successfully Id: {} ", entity.getId());
         return new UserDTO(entity);
+    }
+
+    @Override
+    public UserDTO updaterCpf(UUID id, UserDTO dto) {
+
+        dto = updateCpf(id, dto);
+        publisher.publishEvent(dto.convertToUserDTOEventDTO(), ActionType.UPDATE);
+
+        return dto;
     }
 
     @Transactional
@@ -158,7 +201,7 @@ public class InstructorServiceImpl implements InstructorService {
 
     @Transactional
     @Override
-    public void updateImage(UUID id, UserDTO dto) {
+    public UserDTO updateImage(UUID id, UserDTO dto) {
 
         log.debug("Update Image ImageUrl Received: {} ", dto.getImageUrl());
 
@@ -176,6 +219,15 @@ public class InstructorServiceImpl implements InstructorService {
 
         log.debug("Update Image ImageUrl Saved: {} ", entity.getImageUrl());
         log.info("ImageUrl Update Successfully Id: {} ", entity.getId());
+        return new UserDTO(entity);
+    }
+
+    @Transactional
+    @Override
+    public void updaterImage(UUID id, UserDTO dto) {
+
+       dto = updateImage(id, dto);
+       publisher.publishEvent(dto.convertToUserDTOEventDTO(), ActionType.UPDATE);
     }
 
     @Transactional
@@ -192,6 +244,12 @@ public class InstructorServiceImpl implements InstructorService {
 
         log.debug("DeleteById User Deleted Id: {} ", id);
         log.info("User Deleted Successfully Id: {} ", id);
+    }
+
+    @Override
+    public void deleterById(UUID id) {
+        deleteById(id);
+        publisher.publisherEvent(id, ActionType.DELETE);
     }
 
     void copyDtoToEntity(User entity, UserDTO dto){
