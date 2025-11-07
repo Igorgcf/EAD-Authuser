@@ -10,6 +10,8 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonView;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
@@ -66,7 +68,7 @@ public class UserDTO extends RepresentationModel<UserDTO> {
     @JsonView({UserView.RegistrationPost.class, UserView.UserPut.class})
     private String phoneNumber;
 
-    @CPF(groups = {UserView.RegistrationPost.class, UserView.UserPut.class})
+    @CPF(groups = {UserView.RegistrationPost.class, UserView.CpfPut.class})
     @NotBlank(groups = {UserView.RegistrationPost.class, UserView.CpfPut.class}, message = "The CPF field is mandatory and and blanks are not allowed.")
     @CpfConstraint(groups = {UserView.RegistrationPost.class, UserView.CpfPut.class}, message = "The CPF is already in use.")
     @Size(groups = {UserView.RegistrationPost.class, UserView.CpfPut.class}, min = 7, max = 27, message = "Minimum character value allowed is 07 and the maximum is 27.")
@@ -88,7 +90,7 @@ public class UserDTO extends RepresentationModel<UserDTO> {
 
     public EventDTO convertToUserDTOEventDTO() {
 
-        EventDTO dto =  new EventDTO();
+        EventDTO dto = new EventDTO();
         dto.setId(this.id);
         dto.setUsername(this.username);
         dto.setEmail(this.email);
