@@ -104,6 +104,16 @@ public class UserServiceImpl implements UserService {
 
     }
 
+    @Transactional
+    @Override
+    public UserDTO updater(UUID id, UserDTO dto) {
+
+        dto = update(id, dto);
+        publisher.publishEvent(dto.convertToUserDTOEventDTO(), ActionType.UPDATE);
+
+        return dto;
+    }
+
     @Override
     @Transactional
     public UserDTO updateCpf(UUID id, UserDTO dto) {
@@ -122,6 +132,17 @@ public class UserServiceImpl implements UserService {
         log.info("Cpf updated successfully Id: {}", entity.getId());
 
         return new UserDTO(entity);
+    }
+
+
+    @Override
+    @Transactional
+    public UserDTO updaterCpf(UUID id, UserDTO dto){
+
+        dto = updateCpf(id, dto);
+        publisher.publishEvent(dto.convertToUserDTOEventDTO(), ActionType.UPDATE);
+
+        return dto;
     }
 
     @Override
@@ -161,7 +182,15 @@ public class UserServiceImpl implements UserService {
         log.info("ImageUrl updated successfully imageUrl {}", entity.getImageUrl());
 
         return new UserDTO(entity);
+    }
 
+    @Transactional
+    @Override
+    public UserDTO updaterImage(UUID id, UserDTO dto) {
+
+        dto = updateImage(id, dto);
+        publisher.publishEvent(dto.convertToUserDTOEventDTO(), ActionType.UPDATE);
+        return dto;
     }
 
     @Override
@@ -181,6 +210,13 @@ public class UserServiceImpl implements UserService {
 
         log.debug("User deleted successfully Id: {}", id);
         log.info("User deleted successfully Id: {}", id);
+    }
+
+    @Override
+    public void deleterById(UUID id) {
+
+        deleteById(id);
+        publisher.publisherEvent(id, ActionType.DELETE);
     }
 
     void copyDtoToEntity(User entity, UserDTO dto){
