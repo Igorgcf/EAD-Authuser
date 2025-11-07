@@ -20,11 +20,19 @@ public interface UserService {
 
     UserDTO update(UUID id, UserDTO dto);
 
+    UserDTO updater(UUID id, UserDTO dto);
+
     UserDTO updateCpf (UUID id, UserDTO dto);
+
+    UserDTO updaterCpf (UUID id, UserDTO dto);
 
     void updatePassword(UUID id, UserDTO dto);
 
     UserDTO updateImage(UUID id, UserDTO dto);
 
+    UserDTO updaterImage(UUID id, UserDTO dto);
+
     void deleteById(UUID id);
+
+    void deleterById(UUID id);
 }
