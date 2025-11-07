@@ -60,7 +60,7 @@ public class UserController {
                                           @JsonView(UserDTO.UserView.UserPut.class)
                                           @RequestBody @Valid UserDTO dto){
 
-        dto = service.update(id, dto);
+        dto = service.updater(id, dto);
         return ResponseEntity.ok().body(dto);
     }
 
@@ -69,7 +69,7 @@ public class UserController {
                                              @RequestBody @Validated(UserDTO.UserView.CpfPut.class)
                                              @JsonView(UserDTO.UserView.CpfPut.class) @Valid UserDTO dto){
 
-        dto = service.updateCpf(id, dto);
+        dto = service.updaterCpf(id, dto);
         return ResponseEntity.ok().body(dto);
     }
 
@@ -86,14 +86,14 @@ public class UserController {
                                               @RequestBody @Validated(UserDTO.UserView.ImagePut.class)
                                               @JsonView(UserDTO.UserView.ImagePut.class) @Valid UserDTO dto){
 
-        dto = service.updateImage(id, dto);
+        dto = service.updaterImage(id, dto);
         return ResponseEntity.ok().body("Image updated successfully!");
     }
 
     @DeleteMapping(value = "/{id}")
     public ResponseEntity<Object> deleteById(@PathVariable (value = "id") UUID id){
 
-        service.deleteById(id);
+        service.deleterById(id);
         return ResponseEntity.ok().body("User deleted successfully!");
     }
 }
