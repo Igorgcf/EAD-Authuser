@@ -2,6 +2,7 @@ package com.ead.authuser.controllers;
 
 
 import com.ead.authuser.dto.UserDTO;
+import com.ead.authuser.services.impl.RoleServiceImpl;
 import com.ead.authuser.services.impl.UserServiceImpl;
 import com.fasterxml.jackson.annotation.JsonView;
 import org.springframework.beans.factory.annotation.Autowired;
