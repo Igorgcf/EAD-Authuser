@@ -1,12 +1,16 @@
 package com.ead.authuser.services.impl;
 
 import com.ead.authuser.clients.UserClient;
+import com.ead.authuser.dto.RoleDTO;
 import com.ead.authuser.dto.UserDTO;
 import com.ead.authuser.enums.ActionType;
+import com.ead.authuser.enums.RoleType;
 import com.ead.authuser.enums.UserStatus;
 import com.ead.authuser.enums.UserType;
+import com.ead.authuser.models.Role;
 import com.ead.authuser.models.User;
 import com.ead.authuser.publishers.EventPublisher;
+import com.ead.authuser.repositories.RoleRepository;
 import com.ead.authuser.repositories.UserRepository;
 import com.ead.authuser.services.UserService;
 import com.ead.authuser.services.exceptions.BadRequestException;
@@ -16,6 +20,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -32,10 +37,16 @@ public class UserServiceImpl implements UserService {
     private UserRepository repository;
 
     @Autowired
+    private RoleRepository roleRepository;
+
+    @Autowired
     private UserClient client;
 
     @Autowired
     private EventPublisher publisher;
+
+    @Autowired
+    private PasswordEncoder encoder;
 
     @Override
     @Transactional(readOnly = true)
@@ -44,7 +55,7 @@ public class UserServiceImpl implements UserService {
         if(page.isEmpty()){
             throw new ResourceNotFoundException("No users found.");
         }
-        return page.map(UserDTO::new);
+        return page.map(x -> new UserDTO(x, x.getRoles()));
     }
 
     @Override
@@ -52,7 +63,7 @@ public class UserServiceImpl implements UserService {
     public UserDTO findById(UUID id) {
         Optional<User> obj = repository.findById(id);
         User entity = obj.orElseThrow(() -> new ResourceNotFoundException("Id not found: " + id));
-        return new UserDTO(entity);
+        return new UserDTO(entity, entity.getRoles());
     }
 
     @Override
@@ -64,6 +75,12 @@ public class UserServiceImpl implements UserService {
         User entity = new User();
         entity.setUserType(UserType.STUDENT);
         entity.setUserStatus(UserStatus.ACTIVE);
+        Optional<Role> obj = roleRepository.findByName(RoleType.ROLE_STUDENT);
+        if(obj.isEmpty()){
+            throw new ResourceNotFoundException("Role not found: " + RoleType.ROLE_STUDENT);
+        }
+        entity.getRoles().clear();
+        entity.getRoles().add(obj.get());
         entity.setCreationDate(LocalDateTime.now(ZoneId.of("UTC")));
         entity.setLastUpdateDate(LocalDateTime.now(ZoneId.of("UTC")));
         copyDtoToEntity(entity, dto);
@@ -72,7 +89,7 @@ public class UserServiceImpl implements UserService {
         log.debug("Insert User saved {} ", entity.toString());
         log.info("User Saved successfully Id: {}", entity.getId());
 
-        return new UserDTO(entity);
+        return new UserDTO(entity, entity.getRoles());
     }
 
     @Override
@@ -100,7 +117,7 @@ public class UserServiceImpl implements UserService {
         log.debug("Update User saved {} ", entity.toString());
         log.info("User updated successfully Id: {}", entity.getId());
 
-        return new UserDTO(entity);
+        return new UserDTO(entity, entity.getRoles());
 
     }
 
@@ -228,7 +245,7 @@ public class UserServiceImpl implements UserService {
             }
 
             if (dto.getPassword() != null) {
-                entity.setPassword(dto.getPassword());
+                entity.setPassword(encoder.encode(dto.getPassword()));
             } else {
                 entity.setPassword(entity.getPassword());
             }
