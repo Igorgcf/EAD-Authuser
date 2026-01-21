@@ -2,6 +2,7 @@ package com.ead.authuser.dto;
 
 import com.ead.authuser.enums.UserStatus;
 import com.ead.authuser.enums.UserType;
+import com.ead.authuser.models.Role;
 import com.ead.authuser.models.User;
 import com.ead.authuser.validations.CpfConstraint;
 import com.ead.authuser.validations.EmailConstraint;
@@ -20,8 +21,7 @@ import org.hibernate.validator.constraints.br.CPF;
 import org.springframework.hateoas.RepresentationModel;
 
 import java.time.LocalDateTime;
-import java.util.Objects;
-import java.util.UUID;
+import java.util.*;
 
 @Data
 @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -88,6 +88,8 @@ public class UserDTO extends RepresentationModel<UserDTO> {
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss'Z'")
     private LocalDateTime lastUpdateDate;
 
+    private List<RoleDTO> roles = new ArrayList<>();
+
     public EventDTO convertToUserDTOEventDTO() {
 
         EventDTO dto = new EventDTO();
@@ -146,6 +148,12 @@ public class UserDTO extends RepresentationModel<UserDTO> {
         imageUrl = entity.getImageUrl();
         creationDate = entity.getCreationDate();
         lastUpdateDate = entity.getLastUpdateDate();
+
+    }
+
+    public UserDTO(User entity, List<Role> roles){
+        this(entity);
+        roles.forEach(x -> this.roles.add(new RoleDTO(x)));
     }
 
     @Override
