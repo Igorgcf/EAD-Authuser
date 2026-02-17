@@ -33,6 +33,7 @@ public class UserDTO extends RepresentationModel<UserDTO> {
         public static interface CpfPut {}
         public static interface PasswordPut {}
         public static interface ImagePut {}
+        public static interface login {};
     }
 
     private UUID id;
@@ -40,7 +41,7 @@ public class UserDTO extends RepresentationModel<UserDTO> {
     @NotBlank(groups = UserView.RegistrationPost.class, message = "The username field is mandatory and blanks are not allowed.")
     @Size(groups = UserView.RegistrationPost.class, min = 7, max = 27, message = "Minimum character value allowed is 07 and the maximum is 27.")
     @UsernameConstraint(groups = UserView.RegistrationPost.class, message = "The username is already in use.")
-    @JsonView(UserView.RegistrationPost.class)
+    @JsonView({UserView.RegistrationPost.class, UserView.login.class})
     private String username;
 
     @NotBlank(groups = UserView.RegistrationPost.class, message = "The e-mail field is mandatory and blanks are not allowed.")
@@ -52,7 +53,7 @@ public class UserDTO extends RepresentationModel<UserDTO> {
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     @Size(groups = {UserView.RegistrationPost.class, UserView.PasswordPut.class}, min = 7, max = 37, message = "Minimum character value allowed is 07 and the maximum is 37.")
     @NotBlank(groups = {UserView.RegistrationPost.class, UserView.PasswordPut.class}, message = "The password field is mandatory and blanks are not allowed.")
-    @JsonView({UserView.RegistrationPost.class, UserView.PasswordPut.class})
+    @JsonView({UserView.RegistrationPost.class, UserView.PasswordPut.class, UserView.login.class})
     private String password;
 
     @Size(groups = UserView.PasswordPut.class, min = 7, max = 37, message = "Minimum character value allowed is 07 and the maximum is 37.")
