@@ -1,17 +1,22 @@
 package com.ead.authuser.config.security;
 
-import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
-import org.springframework.security.config.Customizer;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.AuthenticationProvider;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
+import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
 @EnableWebSecurity
@@ -19,6 +24,9 @@ public class WebSecurityConfig {
 
     @Autowired
     private AuthenticationEntryPointImpl authenticationEntryPoint;
+
+    @Autowired
+    private JwtAuthenticationFilter jwtAuthenticationFilter;
 
     private static final String[] AUTH_WHITELIST = {
             "/auth/**"
@@ -29,23 +37,21 @@ public class WebSecurityConfig {
 
         http
                 .csrf(csrf -> csrf.disable())
-                .headers(headers ->
-                        headers.frameOptions(frame -> frame.sameOrigin())
-                )
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(AUTH_WHITELIST).permitAll()
-                        .requestMatchers(HttpMethod.GET, "/ead-authuser/users/**").hasAuthority("ROLE_STUDENT")
+                        .requestMatchers("/auth/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 .exceptionHandling(exception ->
                         exception.authenticationEntryPoint(authenticationEntryPoint)
-                                .accessDeniedHandler((req, res, ex) -> {
-                                    res.sendError(HttpServletResponse.SC_FORBIDDEN, "Access denied!");
-                                } )
-
-
                 )
-                .httpBasic(Customizer.withDefaults());
+                .sessionManagement(session ->
+                        session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                );
+
+        http.addFilterBefore(
+                jwtAuthenticationFilter,
+                UsernamePasswordAuthenticationFilter.class
+        );
 
         return http.build();
     }
@@ -62,5 +68,19 @@ public class WebSecurityConfig {
                 .requestMatchers("/h2-console/**");
     }
 
+    @Bean
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) throws Exception{
+
+        return authenticationConfiguration.getAuthenticationManager();
+    }
+
+    public AuthenticationProvider authenticationProvider(UserDetailsService userDetailsService, PasswordEncoder passwordEncoder){
+
+        DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
+        provider.setUserDetailsService(userDetailsService);
+        provider.setPasswordEncoder(passwordEncoder);
+
+        return provider;
+    }
 }
 
