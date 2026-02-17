@@ -1,6 +1,9 @@
 package com.ead.authuser.services.impl;
 
 import com.ead.authuser.clients.UserClient;
+import com.ead.authuser.config.security.JwtProvider;
+import com.ead.authuser.config.security.WebSecurityConfig;
+import com.ead.authuser.dto.JwtDTO;
 import com.ead.authuser.dto.RoleDTO;
 import com.ead.authuser.dto.UserDTO;
 import com.ead.authuser.enums.ActionType;
@@ -20,6 +23,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -47,6 +54,12 @@ public class UserServiceImpl implements UserService {
 
     @Autowired
     private PasswordEncoder encoder;
+
+    @Autowired
+    private JwtProvider jwtProvider;
+
+    @Autowired
+    private AuthenticationManager authenticationManager;
 
     @Override
     @Transactional(readOnly = true)
@@ -99,6 +112,16 @@ public class UserServiceImpl implements UserService {
         dto = insert(dto);
         publisher.publishEvent(dto.convertToUserDTOEventDTO(), ActionType.CREATE);
         return dto;
+    }
+
+    @Transactional
+    @Override
+    public JwtDTO authentication(UserDTO dto) {
+        Authentication authentication = authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(dto.getUsername(), dto.getPassword()));
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+        String jwt = jwtProvider.generateJwt(authentication);
+        return new JwtDTO(jwt);
     }
 
     @Override
