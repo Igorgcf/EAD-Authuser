@@ -1,5 +1,6 @@
 package com.ead.authuser.services;
 
+import com.ead.authuser.dto.JwtDTO;
 import com.ead.authuser.dto.UserDTO;
 import com.ead.authuser.models.User;
 import org.springframework.data.domain.Page;
@@ -17,6 +18,8 @@ public interface UserService {
     UserDTO insert(UserDTO dto);
 
     UserDTO save(UserDTO dto);
+
+    JwtDTO authentication (UserDTO dto);
 
     UserDTO update(UUID id, UserDTO dto);
 
