@@ -1,10 +1,12 @@
 package com.ead.authuser.controllers;
 
 
+import com.ead.authuser.dto.JwtDTO;
 import com.ead.authuser.dto.UserDTO;
 import com.ead.authuser.services.impl.RoleServiceImpl;
 import com.ead.authuser.services.impl.UserServiceImpl;
 import com.fasterxml.jackson.annotation.JsonView;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -30,6 +32,17 @@ public class AuthenticationController {
 
         dto = service.save(dto);
         return ResponseEntity.status(HttpStatus.CREATED).body(dto);
+    }
+
+    @PostMapping(value = "/login")
+    public ResponseEntity<JwtDTO> authentication(@Validated(UserDTO.UserView.login.class)
+                                                 @JsonView(UserDTO.UserView.login.class)
+                                                 @RequestBody UserDTO dto){
+
+
+        JwtDTO jwtDTO = service.authentication(dto);
+        return ResponseEntity.ok().body(jwtDTO);
+
     }
 }
 
