@@ -1,10 +1,9 @@
 package com.ead.authuser.services.impl;
 
 import com.ead.authuser.clients.UserClient;
+import com.ead.authuser.config.security.AuthenticationCurrentUserService;
 import com.ead.authuser.config.security.JwtProvider;
-import com.ead.authuser.config.security.WebSecurityConfig;
 import com.ead.authuser.dto.JwtDTO;
-import com.ead.authuser.dto.RoleDTO;
 import com.ead.authuser.dto.UserDTO;
 import com.ead.authuser.enums.ActionType;
 import com.ead.authuser.enums.RoleType;
@@ -61,6 +60,9 @@ public class UserServiceImpl implements UserService {
     @Autowired
     private AuthenticationManager authenticationManager;
 
+    @Autowired
+    private AuthenticationCurrentUserService authenticationCurrentUserService;
+
     @Override
     @Transactional(readOnly = true)
     public Page<UserDTO> findAllPaged(Specification<User> spec, Pageable pageable) {
@@ -74,9 +76,16 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional(readOnly = true)
     public UserDTO findById(UUID id) {
-        Optional<User> obj = repository.findById(id);
-        User entity = obj.orElseThrow(() -> new ResourceNotFoundException("Id not found: " + id));
-        return new UserDTO(entity, entity.getRoles());
+
+        UUID currentUserId = authenticationCurrentUserService.getCurrentUser().getId();
+        if (currentUserId.equals(id)) {
+            Optional<User> obj = repository.findById(id);
+            User entity = obj.orElseThrow(() -> new ResourceNotFoundException("Id not found: " + id));
+            return new UserDTO(entity, entity.getRoles());
+        }else{
+            log.warn("Unauthorized access attempt by UserId {} to access UserId {}.", currentUserId, id);
+            throw new ResourceNotFoundException("Unauthorized access attempt by UserId: " + currentUserId + " to access UserId " + id);
+        }
     }
 
     @Override
@@ -86,11 +95,11 @@ public class UserServiceImpl implements UserService {
         log.debug("Insert UserDTO received {} ", dto.toString());
 
         User entity = new User();
-        entity.setUserType(UserType.STUDENT);
+        entity.setUserType(UserType.ADMIN);
         entity.setUserStatus(UserStatus.ACTIVE);
-        Optional<Role> obj = roleRepository.findByName(RoleType.ROLE_STUDENT);
+        Optional<Role> obj = roleRepository.findByName(RoleType.ROLE_ADMIN);
         if(obj.isEmpty()){
-            throw new ResourceNotFoundException("Role not found: " + RoleType.ROLE_STUDENT);
+            throw new ResourceNotFoundException("Role not found: " + RoleType.ROLE_ADMIN);
         }
         entity.getRoles().clear();
         entity.getRoles().add(obj.get());
@@ -193,11 +202,13 @@ public class UserServiceImpl implements UserService {
 
         Optional<User> obj = repository.findById(id);
         User entity = obj.orElseThrow(() -> new ResourceNotFoundException("Id not found: " + id));
-        if (!entity.getPassword().equals(dto.getOldPassword())) {
+
+        if (!encoder.matches(dto.getOldPassword(), entity.getPassword())) {
             log.warn("Error: Mismatched old password UserId {}.", entity.getId());
             throw new BadRequestException("Error: Mismatched old password.");
+
         } else {
-            entity.setPassword(dto.getPassword());
+            entity.setPassword(encoder.encode(dto.getPassword()));
             entity.setLastUpdateDate(LocalDateTime.now(ZoneId.of("UTC")));
             repository.save(entity);
 
