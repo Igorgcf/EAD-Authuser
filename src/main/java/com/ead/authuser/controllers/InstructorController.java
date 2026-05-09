@@ -8,6 +8,7 @@ import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -30,6 +31,7 @@ public class InstructorController {
     @Autowired
     private InstructorService service;
 
+    @PreAuthorize("hasAnyRole('ADMIN')")
     @PostMapping(value = "/subscription")
     public ResponseEntity<UserDTO> insertInstructor(@JsonView(UserDTO.UserView.RegistrationPost.class)
                                                     @Validated(UserDTO.UserView.RegistrationPost.class)
@@ -39,6 +41,7 @@ public class InstructorController {
         return ResponseEntity.status(HttpStatus.CREATED).body(dto);
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN')")
     @PutMapping(value = "/{id}")
     public ResponseEntity<Object> updateUserToInstructor(@PathVariable(value = "id") UUID id){
 
@@ -46,6 +49,7 @@ public class InstructorController {
         return ResponseEntity.ok().body("User updated to instructor successfully.");
     }
 
+    @PreAuthorize("hasAnyRole('INSTRUCTOR')")
     @GetMapping(value = "/{id}")
     public ResponseEntity<UserDTO> findById(@PathVariable(value = "id") UUID id){
 
@@ -53,6 +57,7 @@ public class InstructorController {
         return ResponseEntity.ok().body(dto);
     }
 
+    @PreAuthorize("hasAnyRole('INSTRUCTOR')")
     @PutMapping(value = "/{id}/update")
     public ResponseEntity<UserDTO> updateInstructor(@PathVariable(value = "id") UUID id,
                                                     @JsonView(UserDTO.UserView.UserPut.class)
@@ -63,6 +68,7 @@ public class InstructorController {
         return ResponseEntity.ok().body(dto);
     }
 
+    @PreAuthorize("hasAnyRole('INSTRUCTOR')")
     @PutMapping(value = "/{id}/cpf")
     public ResponseEntity<UserDTO> updateCpf(@PathVariable(value = "id") UUID id,
                                              @JsonView(UserDTO.UserView.CpfPut.class)
@@ -74,6 +80,7 @@ public class InstructorController {
 
     }
 
+    @PreAuthorize("hasAnyRole('INSTRUCTOR')")
     @PutMapping(value = "/{id}/password")
     public ResponseEntity<Object> updatePassword(@PathVariable(value = "id") UUID id,
                                                  @JsonView(UserDTO.UserView.PasswordPut.class)
@@ -84,6 +91,7 @@ public class InstructorController {
         return ResponseEntity.ok().body("Password updated successfully.");
     }
 
+    @PreAuthorize("hasAnyRole('INSTRUCTOR')")
     @PutMapping(value = "/{id}/image")
     public ResponseEntity<Object> updateImage(@PathVariable(value = "id") UUID id,
                                               @JsonView(UserDTO.UserView.ImagePut.class)
@@ -94,6 +102,7 @@ public class InstructorController {
         return ResponseEntity.ok().body("Image updated successfully.");
     }
 
+    @PreAuthorize("hasAnyRole('INSTRUCTOR')")
     @DeleteMapping(value = "/{id}")
     public ResponseEntity<Object> deleteById(@PathVariable (value = "id") UUID id){
 
