@@ -2,16 +2,20 @@ package com.ead.authuser.services.impl;
 
 import com.ead.authuser.dto.UserDTO;
 import com.ead.authuser.enums.ActionType;
+import com.ead.authuser.enums.RoleType;
 import com.ead.authuser.enums.UserStatus;
 import com.ead.authuser.enums.UserType;
+import com.ead.authuser.models.Role;
 import com.ead.authuser.models.User;
 import com.ead.authuser.publishers.EventPublisher;
+import com.ead.authuser.repositories.RoleRepository;
 import com.ead.authuser.repositories.UserRepository;
 import com.ead.authuser.services.InstructorService;
 import com.ead.authuser.services.exceptions.BadRequestException;
 import com.ead.authuser.services.exceptions.ResourceNotFoundException;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -30,6 +34,12 @@ public class InstructorServiceImpl implements InstructorService {
     @Autowired
     private EventPublisher publisher;
 
+    @Autowired
+    private PasswordEncoder encoder;
+
+    @Autowired
+    private RoleRepository roleRepository;
+
     @Transactional
     @Override
     public UserDTO insertInstructor(UserDTO dto) {
@@ -41,6 +51,14 @@ public class InstructorServiceImpl implements InstructorService {
         copyDtoToEntity(entity, dto);;
         entity.setUserType(UserType.INSTRUCTOR);
         entity.setUserStatus(UserStatus.ACTIVE);
+
+        Optional<Role> opt = roleRepository.findByName(RoleType.ROLE_INSTRUCTOR);
+        if(opt.isEmpty()){
+            throw new ResourceNotFoundException("Role not found: " + RoleType.ROLE_INSTRUCTOR);
+        }
+
+        entity.getRoles().clear();
+        entity.getRoles().add(opt.get());
         entity.setCreationDate(LocalDateTime.now(ZoneId.of("UTC")));
         entity.setLastUpdateDate(LocalDateTime.now(ZoneId.of("UTC")));
 
@@ -52,6 +70,7 @@ public class InstructorServiceImpl implements InstructorService {
         return new UserDTO(entity);
     }
 
+    @Transactional
     @Override
     public UserDTO save(UserDTO dto) {
 
@@ -71,6 +90,15 @@ public class InstructorServiceImpl implements InstructorService {
         User entity = obj.orElseThrow(() -> new ResourceNotFoundException("Id not found: " + id));
 
         entity.setUserType(UserType.INSTRUCTOR);
+        entity.setUserStatus(UserStatus.ACTIVE);
+
+        Optional<Role> opt = roleRepository.findByName(RoleType.ROLE_INSTRUCTOR);
+        if(opt.isEmpty()){
+            throw new ResourceNotFoundException("Role not found: " + RoleType.ROLE_INSTRUCTOR);
+        }
+
+        entity.getRoles().clear();
+        entity.getRoles().add(opt.get());
         entity.setLastUpdateDate(LocalDateTime.now(ZoneId.of("UTC")));
 
         repository.save(entity);
@@ -99,7 +127,7 @@ public class InstructorServiceImpl implements InstructorService {
         Optional<User> obj = repository.findById(id);
         User entity = obj.orElseThrow(() -> new ResourceNotFoundException("Id not found: " + id));
 
-        if(!entity.getUserType().equals(UserType.INSTRUCTOR)) {
+        if(!entity.getUserType().equals(UserType.INSTRUCTOR)){
             throw new BadRequestException("Error: User is not an instructor.");
         }
         log.debug("FindById User Found: {} ", entity.toString());
@@ -117,7 +145,7 @@ public class InstructorServiceImpl implements InstructorService {
         Optional<User> obj = repository.findById(id);
         User entity = obj.orElseThrow(() -> new ResourceNotFoundException("Id not found: " + id));
 
-        if(!entity.getUserType().equals(UserType.INSTRUCTOR)){
+        if(!entity.getUserType().equals(UserType.INSTRUCTOR)) {
             throw new BadRequestException("Error: User is not an instructor.");
         }
 
@@ -132,6 +160,7 @@ public class InstructorServiceImpl implements InstructorService {
         return new UserDTO(entity);
     }
 
+    @Transactional
     @Override
     public UserDTO updaterInstructor(UUID id, UserDTO dto) {
 
@@ -150,7 +179,7 @@ public class InstructorServiceImpl implements InstructorService {
         Optional<User> obj = repository.findById(id);
         User entity = obj.orElseThrow(() -> new ResourceNotFoundException("Id not found: " + id));
 
-        if(!entity.getUserType().equals(UserType.INSTRUCTOR)){
+        if(!entity.getUserType().equals(UserType.INSTRUCTOR)) {
             throw new BadRequestException("Error: User is not an instructor.");
         }
 
@@ -164,6 +193,7 @@ public class InstructorServiceImpl implements InstructorService {
         return new UserDTO(entity);
     }
 
+    @Transactional
     @Override
     public UserDTO updaterCpf(UUID id, UserDTO dto) {
 
@@ -182,23 +212,22 @@ public class InstructorServiceImpl implements InstructorService {
         Optional<User> obj = repository.findById(id);
         User entity = obj.orElseThrow(() -> new ResourceNotFoundException("Id not found: " + id));
 
-        if(!entity.getUserType().equals(UserType.INSTRUCTOR)){
+        if(!entity.getUserType().equals(UserType.INSTRUCTOR)) {
             throw new BadRequestException("Error: User is not an instructor.");
         }
 
-        if(!dto.getOldPassword().equals(entity.getPassword())){
+        if (!encoder.matches(dto.getOldPassword(), entity.getPassword())) {
+            log.warn("Error: Mismatched old password UserId {}.", entity.getId());
             throw new BadRequestException("Error: Mismatched old password.");
+        } else {
+            entity.setPassword(encoder.encode(dto.getPassword()));
+            entity.setLastUpdateDate(LocalDateTime.now(ZoneId.of("UTC")));
+            repository.save(entity);
+
+            log.debug("Update Password password saved: {} ", entity.getPassword());
+            log.info("Password updated successfully Id: {} ", entity.getId());
         }
-
-        copyDtoToEntity(entity, dto);
-        entity.setLastUpdateDate(LocalDateTime.now(ZoneId.of("UTC")));
-
-        repository.save(entity);
-
-        log.debug("Update Password password saved: {} ", entity.getPassword());
-        log.info("Password updated successfully Id: {} ", entity.getId());
     }
-
     @Transactional
     @Override
     public UserDTO updateImage(UUID id, UserDTO dto) {
@@ -208,7 +237,7 @@ public class InstructorServiceImpl implements InstructorService {
         Optional<User> obj = repository.findById(id);
         User entity = obj.orElseThrow(() -> new ResourceNotFoundException("Id not found: " + id));
 
-        if(!entity.getUserType().equals(UserType.INSTRUCTOR)){
+        if(!entity.getUserType().equals(UserType.INSTRUCTOR)) {
             throw new BadRequestException("Error: User is not an instructor.");
         }
 
@@ -267,7 +296,7 @@ public class InstructorServiceImpl implements InstructorService {
             }
 
             if(dto.getPassword() != null) {
-                entity.setPassword(dto.getPassword());
+                entity.setPassword(encoder.encode(dto.getPassword()));
             }else{
                 entity.setPassword(entity.getPassword());
             }
