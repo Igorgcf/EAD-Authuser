@@ -13,6 +13,7 @@ import org.springframework.stereotype.Component;
 import java.nio.charset.StandardCharsets;
 import java.security.Key;
 import java.util.Date;
+import java.util.stream.Collectors;
 
 @Log4j2
 @Component
@@ -36,8 +37,13 @@ public class JwtProvider {
         UserDetailsImpl userPrincipal =
                 (UserDetailsImpl) authentication.getPrincipal();
 
+        final String roles = userPrincipal.getAuthorities().stream()
+                .map(role -> { return role.getAuthority();
+                }).collect(Collectors.joining(","));
+
         return Jwts.builder()
-                .setSubject(userPrincipal.getUsername())
+                .setSubject(userPrincipal.getId().toString())
+                .claim("roles", roles)
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(
                         System.currentTimeMillis() + jwtExpirationsMs
@@ -67,7 +73,7 @@ public class JwtProvider {
         return false;
     }
 
-    public String getUsernameFromJwt(String token) {
+    public String getSubjectJwt(String token) {
         return Jwts.parserBuilder()
                 .setSigningKey(key)
                 .build()
