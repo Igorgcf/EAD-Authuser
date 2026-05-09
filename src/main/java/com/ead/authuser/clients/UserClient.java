@@ -15,6 +15,8 @@ import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
@@ -38,9 +40,12 @@ public class UserClient {
     private UtilsService service;
 
     @CircuitBreaker(name = "circuitbreakerInstance")
-    public Page<CourseDTO> findAllCoursesByUser(UUID userId, Pageable pageable) {
+    public Page<CourseDTO> findAllCoursesByUser(UUID userId, Pageable pageable, String token) {
 
         String url = service.createUrl(userId, pageable);
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Authorization", token);
+        HttpEntity<String> requestEntity = new HttpEntity<String>("parameters", headers);
 
         log.debug("Request URL: {} ", url);
         log.info("Request URL: {} ", url);
@@ -48,7 +53,7 @@ public class UserClient {
         try {
             ParameterizedTypeReference<ResponsePageDTO<CourseDTO>> responseType = new ParameterizedTypeReference<ResponsePageDTO<CourseDTO>>() {
             };
-            ResponseEntity<ResponsePageDTO<CourseDTO>> result = restTemplate.exchange(url, HttpMethod.GET, null, responseType);
+            ResponseEntity<ResponsePageDTO<CourseDTO>> result = restTemplate.exchange(url, HttpMethod.GET, requestEntity, responseType);
             if (result.getBody() != null) {
                 log.debug("Response Number of Elements: {} ", result.getBody().getContent().size());
                 return result.getBody();
