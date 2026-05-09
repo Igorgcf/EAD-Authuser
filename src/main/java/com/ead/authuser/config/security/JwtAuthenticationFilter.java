@@ -14,6 +14,7 @@ import org.springframework.security.web.authentication.WebAuthenticationDetailsS
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.UUID;
 
 @Log4j2
 @Configuration
@@ -33,9 +34,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
             if (token != null && jwtProvider.validateJwt(token)) {
 
-                String username = jwtProvider.getUsernameFromJwt(token);
+                String userId = jwtProvider.getSubjectJwt(token);
                 UserDetails userDetails =
-                        userDetailsService.loadUserByUsername(username);
+                        userDetailsService.loadUserById(UUID.fromString(userId));
 
                 UsernamePasswordAuthenticationToken authentication =
                         new UsernamePasswordAuthenticationToken(
@@ -47,6 +48,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 authentication.setDetails(
                         new WebAuthenticationDetailsSource().buildDetails(request)
                 );
+
+                log.info("JWT AUTHENTICATED USER -> {}", userDetails.getUsername());
+                userDetails.getAuthorities()
+                        .forEach(a -> log.info("JWT AUTHORITY -> {}", a.getAuthority()));
 
                 SecurityContextHolder.getContext()
                         .setAuthentication(authentication);
