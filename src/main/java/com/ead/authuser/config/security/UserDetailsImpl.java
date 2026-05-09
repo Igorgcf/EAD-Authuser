@@ -1,9 +1,11 @@
 package com.ead.authuser.config.security;
 
 import com.ead.authuser.dto.UserDTO;
+import com.ead.authuser.models.User;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -14,6 +16,7 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+@Log4j2
 @Data
 @AllArgsConstructor
 public class UserDetailsImpl implements UserDetails, Serializable {
@@ -28,25 +31,24 @@ public class UserDetailsImpl implements UserDetails, Serializable {
     private String email;
     private Collection<? extends GrantedAuthority> authorities;
 
-    public static UserDetailsImpl build(UserDTO dto){
-        List<GrantedAuthority> authorities = dto.getRoles().stream()
-                .map(role -> new SimpleGrantedAuthority(role.getName().toString()))
+    public static UserDetailsImpl buildFromEntity(User user) {
+
+        List<GrantedAuthority> authorities = user.getRoles().stream()
+                .map(role -> new SimpleGrantedAuthority(role.getName().name()))
                 .collect(Collectors.toList());
 
         authorities.forEach(a ->
-                System.out.println("AUTHORITY -> " + a.getAuthority())
+                log.info("LOADED AUTHORITY -> {}", a.getAuthority())
         );
 
-
         return new UserDetailsImpl(
-                dto.getId(),
-                dto.getFullName(),
-                dto.getUsername(),
-                dto.getPassword(),
-                dto.getEmail(),
-                authorities);
-
-
+                user.getId(),
+                user.getFullName(),
+                user.getUsername(),
+                user.getPassword(),
+                user.getEmail(),
+                authorities
+        );
     }
 
     @Override
