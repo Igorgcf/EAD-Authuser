@@ -5,10 +5,7 @@ import com.ead.authuser.config.security.AuthenticationCurrentUserService;
 import com.ead.authuser.config.security.JwtProvider;
 import com.ead.authuser.dto.JwtDTO;
 import com.ead.authuser.dto.UserDTO;
-import com.ead.authuser.enums.ActionType;
-import com.ead.authuser.enums.RoleType;
-import com.ead.authuser.enums.UserStatus;
-import com.ead.authuser.enums.UserType;
+import com.ead.authuser.enums.*;
 import com.ead.authuser.models.Role;
 import com.ead.authuser.models.User;
 import com.ead.authuser.publishers.EventPublisher;
@@ -88,9 +85,45 @@ public class UserServiceImpl implements UserService {
         }
     }
 
+    @Transactional(readOnly = true)
+    @Override
+    public UserDTO findByIdInternal(UUID id) {
+
+        Optional<User> obj = repository.findById(id);
+        User entity = obj.orElseThrow(() -> new ResourceNotFoundException("Id not found: " + id));
+        return new UserDTO(entity, entity.getRoles());
+    }
+
     @Override
     @Transactional
     public UserDTO insert(UserDTO dto) {
+
+        log.debug("Insert UserDTO received {} ", dto.toString());
+
+        User entity = new User();
+        entity.setUserType(UserType.USER);
+        entity.setUserStatus(UserStatus.ACTIVE);
+        Optional<Role> obj = roleRepository.findByName(RoleType.ROLE_USER);
+        if(obj.isEmpty()){
+            throw new ResourceNotFoundException("Role not found: " + RoleType.ROLE_USER);
+        }
+        entity.getRoles().clear();
+        entity.getRoles().add(obj.get());
+        entity.setCreationDate(LocalDateTime.now(ZoneId.of("UTC")));
+        entity.setLastUpdateDate(LocalDateTime.now(ZoneId.of("UTC")));
+        copyDtoToEntity(entity, dto);
+        repository.save(entity);
+
+        log.debug("Insert User saved {} ", entity.toString());
+        log.info("User Saved successfully Id: {}", entity.getId());
+
+        return new UserDTO(entity, entity.getRoles());
+    }
+
+    // for Administration
+    @Override
+    @Transactional
+    public UserDTO insertAdmin(UserDTO dto) {
 
         log.debug("Insert UserDTO received {} ", dto.toString());
 
@@ -110,6 +143,8 @@ public class UserServiceImpl implements UserService {
 
         log.debug("Insert User saved {} ", entity.toString());
         log.info("User Saved successfully Id: {}", entity.getId());
+
+        publisher.publishEvent(entity.convertToUserDTOEventDTO(), ActionType.CREATE);
 
         return new UserDTO(entity, entity.getRoles());
     }
@@ -143,6 +178,7 @@ public class UserServiceImpl implements UserService {
         User entity = obj.orElseThrow(() -> new ResourceNotFoundException("Id not found: " + id));
 
         copyDtoToEntity(entity, dto);
+
         entity.setLastUpdateDate(LocalDateTime.now(ZoneId.of("UTC")));
         repository.save(entity);
 
@@ -159,6 +195,55 @@ public class UserServiceImpl implements UserService {
 
         dto = update(id, dto);
         publisher.publishEvent(dto.convertToUserDTOEventDTO(), ActionType.UPDATE);
+
+        return dto;
+    }
+
+    @Transactional
+    @Override
+    public UserDTO updateAfterPayment(UUID id, PaymentControl paymentControl) {
+
+        Optional<User> obj = repository.findById(id);
+        User entity = obj.orElseThrow(() -> new ResourceNotFoundException("Id not found: " + id));
+
+        Optional<Role> studentRole = roleRepository.findByName(RoleType.ROLE_STUDENT);
+
+        if (studentRole.isEmpty()) {
+            throw new ResourceNotFoundException("Role not found: " + RoleType.ROLE_STUDENT);
+        }
+
+        if (paymentControl == PaymentControl.EFFECTED) {
+
+            if (entity.getUserType().equals(UserType.USER)) {
+                entity.setUserType(UserType.STUDENT);
+            }
+
+            if (!entity.getRoles().contains(studentRole.get())) {
+                entity.getRoles().add(studentRole.get());
+            }
+
+        } else if (paymentControl == PaymentControl.REFUSED) {
+
+            if (entity.getUserType().equals(UserType.STUDENT)) {
+                entity.setUserType(UserType.USER);
+            }
+
+            entity.getRoles().remove(studentRole.get());
+        }
+
+        entity.setLastUpdateDate(LocalDateTime.now(ZoneId.of("UTC")));
+
+        repository.save(entity);
+
+        UserDTO dto = new UserDTO(entity, entity.getRoles());
+
+        log.debug("User updated after payment: {}", entity);
+        log.info("User updated successfully after payment Id: {}", entity.getId());
+
+        publisher.publishEvent(
+                dto.convertToUserDTOEventDTO(),
+                ActionType.UPDATE
+        );
 
         return dto;
     }
@@ -313,5 +398,12 @@ public class UserServiceImpl implements UserService {
             } else {
                 entity.setImageUrl(entity.getImageUrl());
             }
+
+            if(dto.getUserType() != null){
+                entity.setUserType(dto.getUserType());
+            } else {
+                entity.setUserType(entity.getUserType());
+            }
+
         }
     }
