@@ -42,7 +42,14 @@ public class AuthenticationController {
 
         JwtDTO jwtDTO = service.authentication(dto);
         return ResponseEntity.ok().body(jwtDTO);
+    }
 
+    @PostMapping(value = "/admin")
+    public ResponseEntity<UserDTO> insertAdmin(@RequestBody
+                                                @Validated(UserDTO.UserView.RegistrationPost.class)
+                                                @JsonView(UserDTO.UserView.RegistrationPost.class) UserDTO dto){
+        dto = service.insertAdmin(dto);
+        return ResponseEntity.status(HttpStatus.CREATED).body(dto);
     }
 }
 
