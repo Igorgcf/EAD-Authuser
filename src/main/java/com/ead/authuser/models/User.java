@@ -1,5 +1,6 @@
 package com.ead.authuser.models;
 
+import com.ead.authuser.dto.EventDTO;
 import com.ead.authuser.enums.UserStatus;
 import com.ead.authuser.enums.UserType;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -83,5 +84,20 @@ public class User implements Serializable {
         this.imageUrl = imageUrl;
         this.creationDate = creationDate;
         this.lastUpdateDate = lastUpdateDate;
+    }
+
+    public EventDTO convertToUserDTOEventDTO() {
+
+        EventDTO dto = new EventDTO();
+        dto.setId(this.id);
+        dto.setUsername(this.username);
+        dto.setEmail(this.email);
+        dto.setFullName(this.fullName);
+        dto.setUserStatus(this.userStatus.toString());
+        dto.setUserType(this.userType.toString());
+        dto.setPhoneNumber(this.phoneNumber);
+        dto.setCpf(this.cpf);
+        dto.setImageUrl(this.imageUrl);
+        return dto;
     }
 }
