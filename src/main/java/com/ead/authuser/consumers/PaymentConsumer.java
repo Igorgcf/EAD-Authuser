@@ -1,14 +1,7 @@
 package com.ead.authuser.consumers;
 
 import com.ead.authuser.dto.PaymentEventDTO;
-import com.ead.authuser.dto.RoleDTO;
-import com.ead.authuser.dto.UserDTO;
 import com.ead.authuser.enums.PaymentControl;
-import com.ead.authuser.enums.RoleType;
-import com.ead.authuser.enums.UserType;
-import com.ead.authuser.services.RoleService;
-import com.ead.authuser.services.UserService;
-import com.ead.authuser.services.exceptions.BadRequestException;
 import com.ead.authuser.services.impl.RoleServiceImpl;
 import com.ead.authuser.services.impl.UserServiceImpl;
 import lombok.extern.log4j.Log4j2;
@@ -20,8 +13,6 @@ import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Component;
-
-import java.util.UUID;
 
 @Log4j2
 @Component
